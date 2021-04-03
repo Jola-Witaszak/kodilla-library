@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 
 @Getter
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
 public class UserDto {
     private Long id;
     private String firstName;
     private String lastName;
-    private String eMail;
-    private LocalDate accountCreated;
+    private String email;
+    private LocalDate created;
 }

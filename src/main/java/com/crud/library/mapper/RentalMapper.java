@@ -2,8 +2,6 @@ package com.crud.library.mapper;
 
 import com.crud.library.domain.Rental;
 import com.crud.library.domain.RentalDto;
-import com.crud.library.domain.UserDto;
-import com.crud.library.domain.VolumeDto;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

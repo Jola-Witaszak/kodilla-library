@@ -1,29 +1,25 @@
 package com.crud.library.mapper;
 
-import com.crud.library.dbService.TitleService;
-import com.crud.library.domain.Title;
 import com.crud.library.domain.Volume;
 import com.crud.library.domain.VolumeDto;
-import com.crud.library.exception.ValueNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.crud.library.exception.TitleNotFoundException;
+import com.crud.library.repository.TitleRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class VolumeMapper {
-    private final TitleService titleService;
+    private final TitleRepository titleRepository;
 
-    @Autowired
-    public VolumeMapper(TitleService titleService) {
-        this.titleService = titleService;
-    }
-
-    public Volume mapToVolume(final VolumeDto volumeDto) throws ValueNotFoundException {
+    public Volume mapToVolume(final VolumeDto volumeDto) throws TitleNotFoundException {
         return new Volume(
+                volumeDto.getId(),
                 volumeDto.getStatus(),
-                titleService.getTitle(volumeDto.getTitleId()));
+                titleRepository.findById(volumeDto.getTitleId()).orElseThrow(() -> new TitleNotFoundException("Title not found")));
     }
 
     public VolumeDto mapToVolumeDto(final Volume volume) {

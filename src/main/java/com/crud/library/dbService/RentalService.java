@@ -1,37 +1,35 @@
 package com.crud.library.dbService;
 
-import com.crud.library.domain.Rental;
-import com.crud.library.domain.Status;
-import com.crud.library.domain.User;
-import com.crud.library.domain.Volume;
-import com.crud.library.exception.ValueAlreadyExistsException;
-import com.crud.library.exception.ValueNotFoundException;
+import com.crud.library.domain.*;
+import com.crud.library.exception.*;
+import com.crud.library.mapper.RentalMapper;
 import com.crud.library.repository.RentalRepository;
+import com.crud.library.repository.UserRepository;
+import com.crud.library.repository.VolumeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class RentalService {
 
     private final RentalRepository rentalRepository;
-    private final UserService userService;
-    private final VolumeService volumeService;
+    private final RentalMapper rentalMapper;
+    private final UserRepository userRepository;
+    private final VolumeRepository volumeRepository;
 
     public boolean checkIfRentalExists(long volumeId) {
-        Optional<Rental> optionalRental = rentalRepository.findByVolume_Id(volumeId);
-        return optionalRental.isPresent();
+        return rentalRepository.findByVolume_Id(volumeId).isPresent();
     }
 
-    public Rental createRental(long volumeId, long userId) throws ValueNotFoundException, ValueAlreadyExistsException {
-        Volume volume = volumeService.getVolume(volumeId);
-        User user = userService.getUser(userId);
+    public RentalDto createRental(long volumeId, long userId) throws RentalAlreadyExistsException, VolumeNotFoundException, UserNotExistsException {
+        Volume volume = volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists."));
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistsException("User with id " + userId + " not exists."));
 
         if (checkIfRentalExists(volumeId)) {
-            throw new ValueAlreadyExistsException("Rental with volume id " + volumeId + " already exists");
+            throw new RentalAlreadyExistsException("Copy of id " + volumeId + " has already been loaned");
         }
 
         Rental rental = new Rental();
@@ -42,15 +40,15 @@ public class RentalService {
         volume.getRentals().add(rental);
         volume.setStatus(Status.RENTED);
 
-        return rentalRepository.save(rental);
+        return rentalMapper.mapToRentalDto(rentalRepository.save(rental));
     }
 
-    public void returnRental(long volumeId) throws ValueNotFoundException {
-        Volume findVolume = volumeService.getVolume(volumeId);
+    public void deleteRental(long volumeId) throws VolumeNotFoundException, RentalNotFoundException {
+        Volume findVolume = volumeRepository.findById(volumeId).orElseThrow(()-> new VolumeNotFoundException("Copy of id " + volumeId + " not exists."));
 
         Rental rentalToReturn = findVolume.getRentals().stream()
                 .filter(rental -> rental.getVolume().getId().equals(findVolume.getId()))
-                .findFirst().orElseThrow(() -> new ValueNotFoundException("Rental with volume id " + volumeId + " not exists"));
+                .findFirst().orElseThrow(() -> new RentalNotFoundException("Copy of id " + volumeId + " was not rented."));
 
         findVolume.getRentals().remove(rentalToReturn);
         findVolume.setStatus(Status.ACCESSIBLE);
@@ -61,7 +59,7 @@ public class RentalService {
         rentalRepository.deleteById(rentalToReturn.getId());
     }
 
-    public List<Rental> getAllRentals() {
-        return rentalRepository.findAll();
+    public List<RentalDto> getAllRentals() {
+        return rentalMapper.mapToRentalDtoList(rentalRepository.findAll());
     }
 }

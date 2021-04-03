@@ -32,7 +32,8 @@ public class Title {
               fetch = FetchType.LAZY)
     private List<Volume> volumes = new ArrayList<>();
 
-    public Title(String title, String author, LocalDate publicationYear) {
+    public Title(Long id, String title, String author, LocalDate publicationYear) {
+        this.id = id;
         this.title = title;
         this.author = author;
         this.publicationYear = publicationYear;

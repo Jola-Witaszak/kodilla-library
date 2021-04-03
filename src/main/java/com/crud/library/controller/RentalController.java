@@ -1,11 +1,11 @@
 package com.crud.library.controller;
 
 import com.crud.library.dbService.RentalService;
-import com.crud.library.exception.ValueAlreadyExistsException;
-import com.crud.library.exception.ValueNotFoundException;
-import com.crud.library.domain.Rental;
 import com.crud.library.domain.RentalDto;
-import com.crud.library.mapper.RentalMapper;
+import com.crud.library.exception.RentalAlreadyExistsException;
+import com.crud.library.exception.RentalNotFoundException;
+import com.crud.library.exception.UserNotExistsException;
+import com.crud.library.exception.VolumeNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,21 +17,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class RentalController {
     private final RentalService rentalService;
-    private final RentalMapper rentalMapper;
 
-    @PostMapping(value = "createRental")
-    public RentalDto createRental(@RequestParam long volumeId, @RequestParam long userId) throws ValueNotFoundException, ValueAlreadyExistsException {
-        return rentalMapper.mapToRentalDto(rentalService.createRental(volumeId, userId));
+    @PostMapping (value = "create")
+    public RentalDto createRental(@RequestParam long volumeId, @RequestParam long userId) throws RentalAlreadyExistsException, UserNotExistsException, VolumeNotFoundException {
+        return rentalService.createRental(volumeId, userId);
     }
 
-    @GetMapping("getRentals")
+    @GetMapping("get")
     public List<RentalDto> getRentals() {
-        List<Rental> rentals = rentalService.getAllRentals();
-        return rentalMapper.mapToRentalDtoList(rentals);
+        return rentalService.getAllRentals();
     }
 
-    @DeleteMapping(value = "returnRental")
-    public void returnRental(@RequestParam long volumeId) throws ValueNotFoundException {
-        rentalService.returnRental(volumeId);
+    @DeleteMapping(value = "delete")
+    public void deleteRental(@RequestParam long volumeId) throws RentalNotFoundException, VolumeNotFoundException {
+        rentalService.deleteRental(volumeId);
     }
 }

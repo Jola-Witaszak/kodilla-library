@@ -31,7 +31,8 @@ public class Volume {
                fetch = FetchType.LAZY)
     private List<Rental> rentals = new ArrayList<>();
 
-    public Volume(Status status, Title title) {
+    public Volume(Long id, Status status, Title title) {
+        this.id = id;
         this.status = status;
         this.title = title;
     }

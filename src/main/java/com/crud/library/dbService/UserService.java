@@ -1,8 +1,10 @@
 package com.crud.library.dbService;
 
 import com.crud.library.domain.User;
-import com.crud.library.exception.ValueAlreadyExistsException;
-import com.crud.library.exception.ValueNotFoundException;
+import com.crud.library.domain.UserDto;
+import com.crud.library.exception.UserAlreadyExistsException;
+import com.crud.library.exception.UserNotExistsException;
+import com.crud.library.mapper.UserMapper;
 import com.crud.library.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,31 +17,36 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
-    public User createUser(User user) throws ValueAlreadyExistsException {
+    public UserDto createUser(UserDto userDto) throws UserAlreadyExistsException {
+        User user = userMapper.mapToUser(userDto);
+
         Optional<User> optionalUser = userRepository.findByLastName(user.getLastName()).stream()
-                .filter(n -> n.getEMail().equals(user.getEMail()))
+                .filter(n -> n.getEmail().equals(user.getEmail()))
                 .filter(u -> u.getFirstName().equals(user.getFirstName()))
-                .findAny();
+                .findFirst();
 
         if (optionalUser.isPresent()) {
-            throw new ValueAlreadyExistsException("This user already exists");
+            throw new UserAlreadyExistsException("This user already exists in the database.");
         }
-
-        return userRepository.save(user);
+        userRepository.save(user);
+        return userMapper.mapToUserDto(user);
     }
 
-    public User getUser(long userId) throws ValueNotFoundException {
-        Optional<User> optionalUser = userRepository.findById(userId);
-        return optionalUser.orElseThrow(() -> new ValueNotFoundException("User not exists"));
+    public UserDto getUser(long userId) throws UserNotExistsException {
+         return userMapper.mapToUserDto(userRepository.findById(userId).orElseThrow(() -> new UserNotExistsException("User with id " + userId + " not exists.")));
     }
 
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public List<UserDto> getUsers() {
+        return userMapper.mapToUsersDtoList(userRepository.findAll());
     }
 
-    public void deleteUser(long userId) throws ValueNotFoundException {
-        User user = getUser(userId);
-        userRepository.deleteById(user.getId());
+    public void deleteUser(long userId) throws UserNotExistsException {
+        if (userRepository.existsById(userId)) {
+            userRepository.deleteById(userId);
+        } else {
+            throw new UserNotExistsException("User with id " + userId + " not exists.");
+        }
     }
 }

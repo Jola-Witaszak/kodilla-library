@@ -1,6 +1,9 @@
 package com.crud.library.domain;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -12,8 +15,8 @@ import java.util.Set;
 @Table(name = "users")
 @Getter
 @Setter
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class User {
     @Id
     @GeneratedValue
@@ -26,18 +29,19 @@ public class User {
     @NotNull
     private String lastName;
 
-    private String eMail;
+    @NotNull
+    private String email;
 
     @NotNull
-    private LocalDate accountCreated;
+    private LocalDate created;
 
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
-    private Set<Rental> rentals = new HashSet<>();
+    private final Set<Rental> rentals = new HashSet<>();
 
-    public User(String firstName, String lastName, String eMail, LocalDate accountCreated) {
+    public User(@NotNull String firstName, @NotNull String lastName, @NotNull String email, LocalDate created) {
         this.firstName = firstName;
         this.lastName = lastName;
-        this.eMail = eMail;
-        this.accountCreated = accountCreated;
+        this.email = email;
+        this.created = created;
     }
 }

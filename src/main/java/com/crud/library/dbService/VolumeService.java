@@ -3,46 +3,47 @@ package com.crud.library.dbService;
 import com.crud.library.domain.Status;
 import com.crud.library.domain.Title;
 import com.crud.library.domain.Volume;
-import com.crud.library.exception.ValueAlreadyExistsException;
-import com.crud.library.exception.ValueNotFoundException;
+import com.crud.library.domain.VolumeDto;
+import com.crud.library.exception.DuplicateStatusException;
+import com.crud.library.exception.TitleNotFoundException;
+import com.crud.library.exception.VolumeNotFoundException;
+import com.crud.library.mapper.VolumeMapper;
+import com.crud.library.repository.TitleRepository;
 import com.crud.library.repository.VolumeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class VolumeService {
 
     private final VolumeRepository volumeRepository;
-    private final TitleService titleService;
+    private final VolumeMapper volumeMapper;
+    private final TitleRepository titleRepository;
 
-    public Volume createVolume(Volume volume) throws ValueNotFoundException {
-        Title foundTitle = titleService.getTitle(volume.getTitle().getId());
+    public VolumeDto createVolume(VolumeDto volumeDto) throws TitleNotFoundException {
+        Volume volume = volumeMapper.mapToVolume(volumeDto);
+        Title foundTitle = titleRepository.findById(volume.getTitle().getId()).orElseThrow(() -> new TitleNotFoundException("You cannot create a copy until the title exists in the database"));
         foundTitle.getVolumes().add(volume);
-        return volumeRepository.save(volume);
+        return volumeMapper.mapToVolumeDto(volumeRepository.save(volume));
     }
 
-    public Volume getVolume(long volumeId) throws ValueNotFoundException {
-
-        Optional<Volume> optionalVolume = volumeRepository.findById(volumeId);
-        return optionalVolume.orElseThrow(() -> new ValueNotFoundException("Volume not exists in the database"));
+    public VolumeDto getVolume(long volumeId) throws VolumeNotFoundException {
+        return volumeMapper.mapToVolumeDto(volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists.")));
     }
 
-    public Volume updateVolumeStatus(long volumeId, Status status) throws ValueNotFoundException, ValueAlreadyExistsException {
-        Volume findVolume = getVolume(volumeId);
+    public VolumeDto updateVolumeStatus(long volumeId, Status status) throws DuplicateStatusException, VolumeNotFoundException, TitleNotFoundException {
+        Volume foundVolume = volumeMapper.mapToVolume(getVolume(volumeId));
 
-        if (findVolume.getStatus().equals(status)) {
-            throw new ValueAlreadyExistsException("This volume has already status  " + status);
+        if (foundVolume.getStatus().equals(status)) {
+            throw new DuplicateStatusException("You cannot change the status " + status + " to " + status);
         }
-        findVolume.setStatus(status);
-        volumeRepository.save(findVolume);
-        return findVolume;
+        foundVolume.setStatus(status);
+        return volumeMapper.mapToVolumeDto(volumeRepository.save(foundVolume));
     }
 
-    public void deleteVolume(long volumeId) throws ValueNotFoundException {
-        Volume volumeToDelete = getVolume(volumeId);
+    public void deleteVolume(long volumeId) throws VolumeNotFoundException {
+        Volume volumeToDelete = volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists."));
         volumeRepository.deleteById(volumeToDelete.getId());
     }
 }
