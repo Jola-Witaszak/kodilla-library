@@ -14,6 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Setter
+@EqualsAndHashCode
 public class Title {
     @Id
     @GeneratedValue
@@ -29,6 +30,7 @@ public class Title {
     private LocalDate publicationYear;
 
     @OneToMany(mappedBy = "title",
+              cascade = CascadeType.ALL,
               fetch = FetchType.LAZY)
     private List<Volume> volumes = new ArrayList<>();
 

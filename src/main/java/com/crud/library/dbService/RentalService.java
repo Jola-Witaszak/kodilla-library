@@ -1,7 +1,10 @@
 package com.crud.library.dbService;
 
 import com.crud.library.domain.*;
-import com.crud.library.exception.*;
+import com.crud.library.exception.RentalAlreadyExistsException;
+import com.crud.library.exception.RentalNotFoundException;
+import com.crud.library.exception.UserNotExistsException;
+import com.crud.library.exception.VolumeNotFoundException;
 import com.crud.library.mapper.RentalMapper;
 import com.crud.library.repository.RentalRepository;
 import com.crud.library.repository.UserRepository;
@@ -24,17 +27,15 @@ public class RentalService {
         return rentalRepository.findByVolume_Id(volumeId).isPresent();
     }
 
-    public RentalDto createRental(long volumeId, long userId) throws RentalAlreadyExistsException, VolumeNotFoundException, UserNotExistsException {
-        Volume volume = volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists."));
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotExistsException("User with id " + userId + " not exists."));
+    public RentalDto createRental(RentalDto rentalDto) throws RentalAlreadyExistsException, VolumeNotFoundException, UserNotExistsException {
+        Volume volume = volumeRepository.findById(rentalDto.getVolumeId()).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + rentalDto.getVolumeId() + " not exists."));
+        User user = userRepository.findById(rentalDto.getUserId()).orElseThrow(() -> new UserNotExistsException("User with id " + rentalDto.getUserId() + " not exists."));
 
-        if (checkIfRentalExists(volumeId)) {
-            throw new RentalAlreadyExistsException("Copy of id " + volumeId + " has already been loaned");
+        if (checkIfRentalExists(volume.getId())) {
+            throw new RentalAlreadyExistsException("Copy of id " + volume.getId() + " has already been loaned");
         }
 
-        Rental rental = new Rental();
-        rental.setVolume(volume);
-        rental.setUser(user);
+        Rental rental = rentalMapper.mapToRental(rentalDto);
 
         user.getRentals().add(rental);
         volume.getRentals().add(rental);
@@ -61,5 +62,10 @@ public class RentalService {
 
     public List<RentalDto> getAllRentals() {
         return rentalMapper.mapToRentalDtoList(rentalRepository.findAll());
+    }
+
+    public RentalDto get(long rentalId) throws RentalNotFoundException {
+        Rental foundRental =  rentalRepository.findById(rentalId).orElseThrow(() -> new RentalNotFoundException("Rental with id: " + rentalId + " not exists"));
+        return rentalMapper.mapToRentalDto(foundRental);
     }
 }

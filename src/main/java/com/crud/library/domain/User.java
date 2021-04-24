@@ -38,7 +38,7 @@ public class User {
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER)
     private final Set<Rental> rentals = new HashSet<>();
 
-    public User(@NotNull String firstName, @NotNull String lastName, @NotNull String email, LocalDate created) {
+    public User( @NotNull String firstName, @NotNull String lastName, @NotNull String email, LocalDate created) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;

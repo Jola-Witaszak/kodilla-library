@@ -1,6 +1,5 @@
 package com.crud.library.dbService;
 
-import com.crud.library.domain.Status;
 import com.crud.library.domain.Title;
 import com.crud.library.domain.TitleDto;
 import com.crud.library.domain.Volume;
@@ -13,7 +12,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
+import static com.crud.library.domain.Status.ACCESSIBLE;
 
 @Service
 @RequiredArgsConstructor
@@ -21,41 +21,45 @@ public class TitleService {
     private final TitleRepository titleRepository;
     private final TitleMapper titleMapper;
 
-    public TitleDto createTitle(TitleDto titleDto) throws TitleAlreadyExistsException {
-        Title title = titleMapper.mapToTitle(titleDto);
-
+    public boolean checkIfTitleExists(Title title) throws TitleAlreadyExistsException {
         Optional<Title> optionalTitle = titleRepository.findByAuthor(title.getAuthor()).stream()
                 .filter(t -> t.getTitle().equals(title.getTitle()))
                 .filter(r -> r.getPublicationYear().equals(title.getPublicationYear()))
                 .findFirst();
-
-        if (optionalTitle.isPresent()) {
+        if (optionalTitle.isEmpty()) {
+            return false;
+        } else {
             throw new TitleAlreadyExistsException("This title already exists in the database.");
         }
+    }
+
+    public TitleDto createTitle(TitleDto titleDto) throws TitleAlreadyExistsException {
+        Title title = titleMapper.mapToTitle(titleDto);
+
+        if (!checkIfTitleExists(title)) {
             Volume volume = new Volume();
-            volume.setStatus(Status.ACCESSIBLE);
+            volume.setStatus(ACCESSIBLE);
             volume.setTitle(title);
             title.getVolumes().add(volume);
-
-            titleRepository.save(title);
-
-        return titleMapper.mapToTitleDto(title);
+        }
+        Title savedTitle = titleRepository.save(title);
+        return titleMapper.mapToTitleDto(savedTitle);
     }
 
     public TitleDto getTitle(long titleId) throws TitleNotFoundException {
-        return titleMapper.mapToTitleDto(titleRepository.findById(titleId).orElseThrow(() -> new TitleNotFoundException("Title with id " + titleId + " not exists in the database.")));
+        Title title = titleRepository.findById(titleId).orElseThrow(() -> new TitleNotFoundException("Title with id " + titleId + " not exists in the database."));
+        return titleMapper.mapToTitleDto(title);
     }
 
     public List<TitleDto> getAllTitles() {
         return titleMapper.mapToTitleDtoList(titleRepository.findAll());
     }
 
-    public int getAccessibleVolumes(long titleId) throws TitleNotFoundException {
+    public long getAccessibleVolumes(long titleId) throws TitleNotFoundException {
         Title foundTitle = titleMapper.mapToTitle(getTitle(titleId));
 
-        List<Volume> volumes = foundTitle.getVolumes().stream()
-                            .filter(volume -> volume.getStatus().equals(Status.ACCESSIBLE))
-                            .collect(Collectors.toList());
-        return volumes.size();
+         return foundTitle.getVolumes().stream()
+                            .filter(volume -> volume.getStatus().equals(ACCESSIBLE))
+                            .count();
     }
 }

@@ -20,9 +20,11 @@ public class Rental {
     @GeneratedValue
     private Long id;
 
-    private final LocalDate rentalDate = LocalDate.now();
+    @NotNull
+    private LocalDate rentalDate;
 
-    private final LocalDate returnDate = LocalDate.now().plusDays(14);
+    @NotNull
+    private LocalDate returnDate;
 
     @ManyToOne()
     @JoinColumn(name = "volume_id")
@@ -33,5 +35,4 @@ public class Rental {
     @JoinColumn(name = "user_id")
     @NotNull
     private User user;
-
 }

@@ -18,18 +18,23 @@ import java.util.List;
 public class RentalController {
     private final RentalService rentalService;
 
-    @PostMapping (value = "create")
-    public RentalDto createRental(@RequestParam long volumeId, @RequestParam long userId) throws RentalAlreadyExistsException, UserNotExistsException, VolumeNotFoundException {
-        return rentalService.createRental(volumeId, userId);
+    @PostMapping
+    public RentalDto createRental(@RequestBody RentalDto rentalDto) throws RentalAlreadyExistsException, UserNotExistsException, VolumeNotFoundException {
+        return rentalService.createRental(rentalDto);
     }
 
-    @GetMapping("get")
-    public List<RentalDto> getRentals() {
+    @GetMapping
+    public List<RentalDto> getAll() {
         return rentalService.getAllRentals();
     }
 
-    @DeleteMapping(value = "delete")
-    public void deleteRental(@RequestParam long volumeId) throws RentalNotFoundException, VolumeNotFoundException {
+    @GetMapping("/{id}")
+    public RentalDto get(@PathVariable("id") long id) throws RentalNotFoundException {
+        return rentalService.get(id);
+    }
+
+    @DeleteMapping("/{volumeId}")
+    public void deleteRental(@PathVariable("volumeId") long volumeId) throws RentalNotFoundException, VolumeNotFoundException {
         rentalService.deleteRental(volumeId);
     }
 }

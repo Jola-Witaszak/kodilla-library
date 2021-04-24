@@ -1,6 +1,5 @@
 package com.crud.library.dbService;
 
-import com.crud.library.domain.Status;
 import com.crud.library.domain.Title;
 import com.crud.library.domain.Volume;
 import com.crud.library.domain.VolumeDto;
@@ -25,20 +24,22 @@ public class VolumeService {
         Volume volume = volumeMapper.mapToVolume(volumeDto);
         Title foundTitle = titleRepository.findById(volume.getTitle().getId()).orElseThrow(() -> new TitleNotFoundException("You cannot create a copy until the title exists in the database"));
         foundTitle.getVolumes().add(volume);
-        return volumeMapper.mapToVolumeDto(volumeRepository.save(volume));
+        Volume savedVolume = volumeRepository.save(volume);
+        return volumeMapper.mapToVolumeDto(savedVolume);
     }
 
     public VolumeDto getVolume(long volumeId) throws VolumeNotFoundException {
-        return volumeMapper.mapToVolumeDto(volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists.")));
+        Volume findVolume = volumeRepository.findById(volumeId).orElseThrow(() -> new VolumeNotFoundException("Volume with id " + volumeId + " not exists."));
+        return volumeMapper.mapToVolumeDto(findVolume);
     }
 
-    public VolumeDto updateVolumeStatus(long volumeId, Status status) throws DuplicateStatusException, VolumeNotFoundException, TitleNotFoundException {
-        Volume foundVolume = volumeMapper.mapToVolume(getVolume(volumeId));
+    public VolumeDto updateVolumeStatus(final VolumeDto volumeDto) throws DuplicateStatusException, VolumeNotFoundException, TitleNotFoundException {
+        Volume foundVolume = volumeMapper.mapToVolume(getVolume(volumeDto.getId()));
 
-        if (foundVolume.getStatus().equals(status)) {
-            throw new DuplicateStatusException("You cannot change the status " + status + " to " + status);
+        if (foundVolume.getStatus().equals(volumeDto.getStatus())) {
+            throw new DuplicateStatusException("You cannot change the status " + foundVolume.getStatus() + " to " + volumeDto.getStatus());
         }
-        foundVolume.setStatus(status);
+        foundVolume.setStatus(volumeDto.getStatus());
         return volumeMapper.mapToVolumeDto(volumeRepository.save(foundVolume));
     }
 

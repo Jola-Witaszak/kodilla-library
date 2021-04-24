@@ -5,7 +5,6 @@ import com.crud.library.domain.UserDto;
 import com.crud.library.exception.UserAlreadyExistsException;
 import com.crud.library.exception.UserNotExistsException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,23 +16,23 @@ import java.util.List;
 public class UserController {
     private final UserService userService;
 
-    @PostMapping(value = "create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping
     public UserDto createUser(@RequestBody UserDto userDto) throws UserAlreadyExistsException {
         return userService.createUser(userDto);
     }
 
-    @GetMapping(value = "get")
-    public UserDto getUser(@RequestParam long userId) throws UserNotExistsException {
+    @GetMapping("/{userId}")
+    public UserDto getUser(@PathVariable long userId) throws UserNotExistsException {
         return userService.getUser(userId);
     }
 
-    @GetMapping(value = "getAll")
+    @GetMapping
     public List<UserDto> getUsers() {
         return userService.getUsers();
     }
 
-    @DeleteMapping("delete")
-    public void deleteUser(@RequestParam long userId) throws UserNotExistsException {
+    @DeleteMapping("/{userId}")
+    public void deleteUser(@PathVariable long userId) throws UserNotExistsException {
         userService.deleteUser(userId);
     }
 }
