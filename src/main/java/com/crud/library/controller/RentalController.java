@@ -19,7 +19,7 @@ public class RentalController {
     private final RentalService rentalService;
 
     @PostMapping
-    public RentalDto createRental(@RequestBody RentalDto rentalDto) throws RentalAlreadyExistsException, UserNotExistsException, VolumeNotFoundException {
+    public RentalDto create(@RequestBody RentalDto rentalDto) throws RentalAlreadyExistsException, UserNotExistsException, VolumeNotFoundException {
         return rentalService.createRental(rentalDto);
     }
 
@@ -34,7 +34,7 @@ public class RentalController {
     }
 
     @DeleteMapping("/{volumeId}")
-    public void deleteRental(@PathVariable("volumeId") long volumeId) throws RentalNotFoundException, VolumeNotFoundException {
+    public void delete(@PathVariable("volumeId") long volumeId) throws RentalNotFoundException, VolumeNotFoundException {
         rentalService.deleteRental(volumeId);
     }
 }

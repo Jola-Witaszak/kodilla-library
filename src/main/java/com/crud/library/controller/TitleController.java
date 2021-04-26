@@ -18,17 +18,17 @@ public class TitleController {
     private final TitleService titleService;
 
     @PostMapping
-    public TitleDto createTitle(@RequestBody TitleDto titleDto) throws TitleAlreadyExistsException {
+    public TitleDto create(@RequestBody TitleDto titleDto) throws TitleAlreadyExistsException {
         return titleService.createTitle(titleDto);
     }
 
     @GetMapping
-    public List<TitleDto> getAllTitles() {
+    public List<TitleDto> getAll() {
         return titleService.getAllTitles();
     }
 
     @GetMapping("/one/{id}")
-    public TitleDto getTitle(@PathVariable("id") long id) throws TitleNotFoundException {
+    public TitleDto get(@PathVariable("id") long id) throws TitleNotFoundException {
         return titleService.getTitle(id);
     }
 

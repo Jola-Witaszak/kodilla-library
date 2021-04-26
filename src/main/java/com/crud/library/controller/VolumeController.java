@@ -16,22 +16,22 @@ public class VolumeController {
     private final VolumeService volumeService;
 
     @PostMapping
-    public VolumeDto createVolume(@RequestBody VolumeDto volumeDto) throws TitleNotFoundException {
+    public VolumeDto create(@RequestBody VolumeDto volumeDto) throws TitleNotFoundException {
         return volumeService.createVolume(volumeDto);
     }
 
     @GetMapping(value = "/{volumeId}")
-    public VolumeDto getVolume(@PathVariable long volumeId) throws VolumeNotFoundException {
+    public VolumeDto get(@PathVariable long volumeId) throws VolumeNotFoundException {
         return volumeService.getVolume(volumeId);
     }
 
     @PutMapping
-    public VolumeDto updateVolumeStatus(@RequestBody VolumeDto volumeDto) throws DuplicateStatusException, VolumeNotFoundException, TitleNotFoundException {
+    public VolumeDto updateStatus(@RequestBody VolumeDto volumeDto) throws DuplicateStatusException, VolumeNotFoundException, TitleNotFoundException {
         return volumeService.updateVolumeStatus(volumeDto);
     }
 
     @DeleteMapping(value = "/{volumeId}")
-    public void deleteVolume(@PathVariable long volumeId) throws VolumeNotFoundException {
+    public void delete(@PathVariable long volumeId) throws VolumeNotFoundException {
         volumeService.deleteVolume(volumeId);
     }
 }

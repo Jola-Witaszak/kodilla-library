@@ -17,12 +17,12 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping
-    public UserDto createUser(@RequestBody UserDto userDto) throws UserAlreadyExistsException {
+    public UserDto create(@RequestBody UserDto userDto) throws UserAlreadyExistsException {
         return userService.createUser(userDto);
     }
 
     @GetMapping("/{userId}")
-    public UserDto getUser(@PathVariable long userId) throws UserNotExistsException {
+    public UserDto get(@PathVariable long userId) throws UserNotExistsException {
         return userService.getUser(userId);
     }
 
@@ -32,7 +32,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@PathVariable long userId) throws UserNotExistsException {
+    public void delete(@PathVariable long userId) throws UserNotExistsException {
         userService.deleteUser(userId);
     }
 }
